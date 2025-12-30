@@ -75,6 +75,28 @@ A complete parking management system with backend API, frontend UI, and database
 
 ## Quick Start with Docker
 
+### Option 1: Windows Automated Setup (Recommended for Windows users)
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd SISTEMA-DE-ESTACIONAMENTO
+```
+
+2. **Run the automated setup script**
+```cmd
+run_parking_system.bat
+```
+
+The script will:
+- Check for Docker and Docker Compose
+- Create `.env` files from examples
+- Install dependencies (if Node.js is available)
+- Build and start all services with Docker Compose
+- Display access URLs and default credentials
+
+### Option 2: Manual Docker Setup (Cross-platform)
+
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
@@ -86,12 +108,14 @@ cd SISTEMA-DE-ESTACIONAMENTO
 docker-compose up --build
 ```
 
-3. **Access the application**
+### Access the Application
+
 - Frontend: http://localhost:3001
 - API: http://localhost:3000
 - API Documentation: http://localhost:3000/api/docs
 
-4. **Default Credentials**
+### Default Credentials
+
 - **Admin**: username: `admin`, password: `admin123`
 - **Operator**: username: `operator`, password: `operator123`
 
@@ -287,6 +311,39 @@ On first run, the system automatically seeds:
    - Hourly rate: $5.00
    - Daily cap: $50.00
    - Lost ticket fee: $100.00
+
+## Managing Docker Services
+
+### View Service Status
+```bash
+docker-compose ps
+```
+
+### View Logs
+```bash
+# All services
+docker-compose logs -f
+
+# Specific service
+docker-compose logs -f api
+docker-compose logs -f web
+docker-compose logs -f db
+```
+
+### Stop Services
+```bash
+docker-compose down
+```
+
+### Restart Services
+```bash
+docker-compose restart
+```
+
+### Rebuild and Restart
+```bash
+docker-compose up -d --build
+```
 
 ## Lint and Format
 

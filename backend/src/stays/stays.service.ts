@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Stay, StayStatus } from './stay.entity';
 import { Vehicle } from '../vehicles/vehicle.entity';
 import { ParkingSlot } from '../parking-slots/parking-slot.entity';
 import { PricingService } from '../pricing/pricing.service';
+import { MonthlySubscribersService } from '../monthly-subscribers/monthly-subscribers.service';
 import { CheckInDto, CheckOutDto } from './dto/stay.dto';
 
 @Injectable()
@@ -17,6 +18,10 @@ export class StaysService {
     @InjectRepository(ParkingSlot)
     private slotRepository: Repository<ParkingSlot>,
     private pricingService: PricingService,
+    // Note: forwardRef is used to resolve circular dependency between StaysModule and MonthlySubscribersModule.
+    // This is acceptable as both modules need to reference each other's services.
+    @Inject(forwardRef(() => MonthlySubscribersService))
+    private subscribersService: MonthlySubscribersService,
   ) {}
 
   async checkIn(dto: CheckInDto, userId: string): Promise<Stay> {
@@ -90,18 +95,31 @@ export class StaysService {
       throw new BadRequestException('Stay already completed');
     }
 
-    // Calculate fee
     const checkOutTime = new Date();
-    const calculation = await this.pricingService.calculateFee({
-      checkInTime: stay.checkInTime,
-      checkOutTime,
-      isLostTicket: dto.isLostTicket || false,
-    });
+    let calculatedFee = 0;
+
+    // Check if vehicle has an active monthly subscription
+    // Note: This query is acceptable for the current implementation.
+    // For high-traffic scenarios, consider caching subscriber status.
+    const isMonthlySubscriber = await this.subscribersService.checkIfSubscriberActive(stay.vehicle.id);
+
+    if (isMonthlySubscriber) {
+      // Monthly subscribers skip per-stay charges
+      calculatedFee = 0;
+    } else {
+      // Calculate fee for non-subscribers
+      const calculation = await this.pricingService.calculateFee({
+        checkInTime: stay.checkInTime,
+        checkOutTime,
+        isLostTicket: dto.isLostTicket || false,
+      });
+      calculatedFee = calculation.fee;
+    }
 
     // Update stay
     stay.checkOutTime = checkOutTime;
     stay.status = StayStatus.COMPLETED;
-    stay.calculatedFee = calculation.fee;
+    stay.calculatedFee = calculatedFee;
     stay.isLostTicket = dto.isLostTicket || false;
 
     // Free up slot
