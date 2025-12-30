@@ -160,6 +160,92 @@ docker compose up -d --build
 - **Admin**: username: `admin`, password: `admin123`
 - **Operator**: username: `operator`, password: `operator123`
 
+## Rodando local sem Docker
+
+Se você prefere executar o sistema localmente sem Docker, use os scripts fornecidos que automatizam a configuração e inicialização.
+
+### Pré-requisitos
+
+- Node.js 18+
+- npm
+- PostgreSQL 15+ instalado e rodando localmente
+
+### Windows
+
+1. **Clone o repositório**
+```bash
+git clone <repository-url>
+cd SISTEMA-DE-ESTACIONAMENTO
+```
+
+2. **Configure o PostgreSQL**
+   - Certifique-se de que o PostgreSQL está rodando em `localhost:5432`
+   - Crie o banco de dados `parking_system` (se não existir)
+   - Ajuste as credenciais no arquivo `backend/.env` após a primeira execução
+
+3. **Execute o script de configuração**
+```cmd
+run_local_no_docker.bat
+```
+
+O script irá:
+- ✅ Verificar instalação do Node.js e npm
+- ✅ Criar arquivos `.env` a partir dos `.env.example` (se não existirem)
+- ✅ Instalar dependências do backend e frontend
+- ✅ Iniciar a API backend em uma nova janela
+- ✅ Iniciar o frontend em outra nova janela
+- ✅ Exibir as URLs de acesso
+
+### Linux / macOS
+
+1. **Clone o repositório**
+```bash
+git clone <repository-url>
+cd SISTEMA-DE-ESTACIONAMENTO
+```
+
+2. **Configure o PostgreSQL**
+   - Certifique-se de que o PostgreSQL está rodando em `localhost:5432`
+   - Crie o banco de dados `parking_system` (se não existir)
+   - Ajuste as credenciais no arquivo `backend/.env` após a primeira execução
+
+3. **Execute o script de configuração**
+```bash
+./run_local_no_docker.sh
+```
+
+O script irá:
+- ✅ Verificar instalação do Node.js e npm
+- ✅ Criar arquivos `.env` a partir dos `.env.example` (se não existirem)
+- ✅ Instalar dependências do backend e frontend
+- ✅ Iniciar ambos os serviços em segundo plano
+- ✅ Exibir as URLs de acesso e localização dos logs
+
+### Acessar a aplicação
+
+Após executar o script:
+
+- **Frontend**: http://localhost:5173
+- **API**: http://localhost:3000
+- **Documentação API (Swagger)**: http://localhost:3000/api/docs
+
+> **Nota:** As portas padrão podem ser configuradas no arquivo `.env`. Defina `WEB_PORT` para o frontend e `API_PORT` para a API backend.
+
+### Credenciais padrão
+
+- **Admin**: username: `admin`, password: `admin123`
+- **Operator**: username: `operator`, password: `operator123`
+
+### Parar os serviços
+
+- **Windows**: Feche as janelas do terminal ou pressione `Ctrl+C` em cada janela
+- **Linux/macOS**: Pressione `Ctrl+C` no terminal onde o script está rodando (ambos os serviços serão encerrados)
+
+### Logs
+
+- **Linux/macOS**: Os logs são gravados em `backend.log` e `frontend.log` no diretório raiz
+- **Windows**: Os logs aparecem nas janelas de terminal abertas
+
 ## Local Development Setup
 
 ### Backend Setup
