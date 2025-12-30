@@ -124,6 +124,10 @@ if [ -f .env ]; then
     if [ ! -z "$API_PORT_ROOT" ]; then
         API_PORT=$API_PORT_ROOT
     fi
+    WEB_PORT_ROOT=$(grep -E "^WEB_PORT=" .env | cut -d '=' -f2 | tr -d ' ' 2>/dev/null || echo "")
+    if [ ! -z "$WEB_PORT_ROOT" ]; then
+        WEB_PORT=$WEB_PORT_ROOT
+    fi
 fi
 
 echo "[6/6] Starting services..."

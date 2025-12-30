@@ -131,6 +131,7 @@ if exist "backend\.env" (
 )
 if exist ".env" (
     for /f "tokens=1,2 delims==" %%a in ('findstr /r "^API_PORT=" .env 2^>nul') do set API_PORT=%%b
+    for /f "tokens=1,2 delims==" %%a in ('findstr /r "^WEB_PORT=" .env 2^>nul') do set WEB_PORT=%%b
 )
 
 echo [6/6] Starting services...
