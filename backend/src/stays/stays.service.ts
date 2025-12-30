@@ -18,6 +18,8 @@ export class StaysService {
     @InjectRepository(ParkingSlot)
     private slotRepository: Repository<ParkingSlot>,
     private pricingService: PricingService,
+    // Note: forwardRef is used to resolve circular dependency between StaysModule and MonthlySubscribersModule.
+    // This is acceptable as both modules need to reference each other's services.
     @Inject(forwardRef(() => MonthlySubscribersService))
     private subscribersService: MonthlySubscribersService,
   ) {}
@@ -97,6 +99,8 @@ export class StaysService {
     let calculatedFee = 0;
 
     // Check if vehicle has an active monthly subscription
+    // Note: This query is acceptable for the current implementation.
+    // For high-traffic scenarios, consider caching subscriber status.
     const isMonthlySubscriber = await this.subscribersService.checkIfSubscriberActive(stay.vehicle.id);
 
     if (isMonthlySubscriber) {

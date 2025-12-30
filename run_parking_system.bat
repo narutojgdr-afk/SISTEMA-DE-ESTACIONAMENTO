@@ -21,7 +21,6 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-echo Docker found: 
 docker --version
 echo.
 
