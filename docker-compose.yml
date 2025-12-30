@@ -37,7 +37,7 @@ services:
       PRICING_DAILY_CAP: ${PRICING_DAILY_CAP:-50.00}
       PRICING_LOST_TICKET_FEE: ${PRICING_LOST_TICKET_FEE:-100.00}
     ports:
-      - "${API_PORT:-3000}:${API_PORT:-3000}"
+      - "${API_PORT:-3000}:3000"
     depends_on:
       db:
         condition: service_healthy

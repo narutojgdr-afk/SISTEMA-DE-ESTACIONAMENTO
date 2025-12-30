@@ -140,10 +140,19 @@ echo ========================================
 echo System started successfully!
 echo ========================================
 echo.
+
+REM Read port values from .env file if they exist
+set API_PORT=3000
+set WEB_PORT=5173
+if exist ".env" (
+    for /f "tokens=1,2 delims==" %%a in ('findstr /r "^API_PORT=" .env') do set API_PORT=%%b
+    for /f "tokens=1,2 delims==" %%a in ('findstr /r "^WEB_PORT=" .env') do set WEB_PORT=%%b
+)
+
 echo Services are now running:
-echo   - Frontend:  http://localhost:5173
-echo   - API:       http://localhost:3000
-echo   - Swagger:   http://localhost:3000/api/docs
+echo   - Frontend:  http://localhost:%WEB_PORT%
+echo   - API:       http://localhost:%API_PORT%
+echo   - Swagger:   http://localhost:%API_PORT%/api/docs
 echo.
 echo Default credentials:
 echo   Admin:    username: admin    password: admin123

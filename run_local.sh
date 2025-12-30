@@ -119,10 +119,19 @@ if [ $? -eq 0 ]; then
     echo "System started successfully!"
     echo "========================================"
     echo ""
+    
+    # Read port values from .env file if they exist
+    API_PORT=3000
+    WEB_PORT=5173
+    if [ -f .env ]; then
+        API_PORT=$(grep -E "^API_PORT=" .env | cut -d '=' -f2 | tr -d ' ' || echo "3000")
+        WEB_PORT=$(grep -E "^WEB_PORT=" .env | cut -d '=' -f2 | tr -d ' ' || echo "5173")
+    fi
+    
     echo "Services are now running:"
-    echo "  - Frontend:  http://localhost:5173"
-    echo "  - API:       http://localhost:3000"
-    echo "  - Swagger:   http://localhost:3000/api/docs"
+    echo "  - Frontend:  http://localhost:$WEB_PORT"
+    echo "  - API:       http://localhost:$API_PORT"
+    echo "  - Swagger:   http://localhost:$API_PORT/api/docs"
     echo ""
     echo "Default credentials:"
     echo "  Admin:    username: admin    password: admin123"
