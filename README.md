@@ -66,7 +66,9 @@ A complete parking management system with backend API, frontend UI, and database
 
 ### Docker Deployment (Recommended)
 - Docker Engine 20.10+
-- Docker Compose v2.0+
+- Docker Compose v2.0+ (or docker-compose v1.29+)
+
+> **Note:** The setup scripts automatically detect and work with both Docker Compose V2 (`docker compose`) and V1 (`docker-compose`).
 
 ### Local Development
 - Node.js 18+
@@ -75,7 +77,16 @@ A complete parking management system with backend API, frontend UI, and database
 
 ## Quick Start with Docker
 
-### Option 1: Windows Automated Setup (Recommended for Windows users)
+The easiest way to run the parking management system locally is using the provided setup scripts that handle all configuration and Docker management automatically.
+
+### Prerequisites
+
+- Docker Engine 20.10+ and Docker Compose v2.0+ (or docker-compose v1.29+)
+- Optional: Node.js 18+ (for local development outside Docker)
+
+### Automated Setup Scripts
+
+#### Windows
 
 1. **Clone the repository**
 ```bash
@@ -83,19 +94,19 @@ git clone <repository-url>
 cd SISTEMA-DE-ESTACIONAMENTO
 ```
 
-2. **Run the automated setup script**
+2. **Run the setup script**
 ```cmd
-run_parking_system.bat
+run_local.bat
 ```
 
 The script will:
-- Check for Docker and Docker Compose
-- Create `.env` files from examples
-- Install dependencies (if Node.js is available)
-- Build and start all services with Docker Compose
-- Display access URLs and default credentials
+- ✅ Check for Docker and Docker Compose installation
+- ✅ Create `.env` file from `.env.example` if it doesn't exist
+- ✅ Install npm dependencies in `api` and `web` folders (if Node.js is available)
+- ✅ Build and start all Docker containers (`docker compose up -d --build`)
+- ✅ Display service URLs and default credentials
 
-### Option 2: Manual Docker Setup (Cross-platform)
+#### Linux / macOS
 
 1. **Clone the repository**
 ```bash
@@ -103,16 +114,46 @@ git clone <repository-url>
 cd SISTEMA-DE-ESTACIONAMENTO
 ```
 
-2. **Start all services**
+2. **Run the setup script**
 ```bash
-docker-compose up --build
+./run_local.sh
+```
+
+The script will:
+- ✅ Check for Docker and Docker Compose installation
+- ✅ Create `.env` file from `.env.example` if it doesn't exist
+- ✅ Install npm dependencies in `api` and `web` folders (if Node.js is available)
+- ✅ Build and start all Docker containers (`docker compose up -d --build`)
+- ✅ Display service URLs and default credentials
+
+### Manual Docker Setup (Alternative)
+
+If you prefer to set up manually without the scripts:
+
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd SISTEMA-DE-ESTACIONAMENTO
+```
+
+2. **Create environment file**
+```bash
+cp .env.example .env
+# Edit .env if you need to change default ports or configuration
+```
+
+3. **Start all services**
+```bash
+docker compose up -d --build
 ```
 
 ### Access the Application
 
-- Frontend: http://localhost:3001
+- Frontend: http://localhost:5173
 - API: http://localhost:3000
 - API Documentation: http://localhost:3000/api/docs
+
+> **Note:** Default ports can be configured in the `.env` file. Set `WEB_PORT` for the frontend and `API_PORT` for the backend API.
 
 ### Default Credentials
 
@@ -173,7 +214,43 @@ The frontend will be available at http://localhost:5173
 
 ## Environment Variables
 
-### Backend (.env)
+The system uses a centralized `.env` file in the root directory for all configuration. Copy `.env.example` to `.env` and adjust values as needed.
+
+### Root Configuration (.env)
+
+```env
+# Database
+DB_HOST=db
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=parking_system
+
+# JWT
+JWT_SECRET=parking-system-secret-key-change-in-production
+JWT_EXPIRES_IN=24h
+
+# Pricing Defaults
+PRICING_FREE_TOLERANCE_MINUTES=15
+PRICING_PRORATED_FRACTION_MINUTES=60
+PRICING_HOURLY_RATE=5.00
+PRICING_DAILY_CAP=50.00
+PRICING_LOST_TICKET_FEE=100.00
+
+# API Configuration
+API_PORT=3000
+NODE_ENV=production
+
+# Frontend Configuration
+WEB_PORT=5173
+VITE_API_URL=http://localhost:3000
+```
+
+### Local Development (Outside Docker)
+
+For local development without Docker, you can still use the individual `.env` files in `backend/` and `frontend/` directories:
+
+#### Backend (.env)
 
 ```env
 # Database

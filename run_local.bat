@@ -1,18 +1,18 @@
 @echo off
 REM ============================================================================
-REM Parking Management System - Windows Runner Script
+REM Parking Management System - Local Development Setup (Windows)
 REM ============================================================================
 REM This script automates the setup and startup of the parking management system
 REM Prerequisites: Docker Desktop installed and running
 REM ============================================================================
 
 echo ========================================
-echo Parking Management System - Setup
+echo Parking Management System - Local Setup
 echo ========================================
 echo.
 
 REM Check if Docker is installed
-echo [1/6] Checking Docker installation...
+echo [1/5] Checking Docker installation...
 docker --version >nul 2>&1
 if errorlevel 1 (
     echo ERROR: Docker is not installed or not in PATH
@@ -24,22 +24,29 @@ if errorlevel 1 (
 docker --version
 echo.
 
-REM Check if Docker Compose is available
-echo [2/6] Checking Docker Compose...
+REM Check if Docker Compose is available (try v2 first, then v1)
+echo [2/5] Checking Docker Compose...
 docker compose version >nul 2>&1
 if errorlevel 1 (
-    echo ERROR: Docker Compose is not available
-    echo Please ensure Docker Desktop is installed with Compose V2
-    echo.
-    pause
-    exit /b 1
+    docker-compose --version >nul 2>&1
+    if errorlevel 1 (
+        echo ERROR: Docker Compose is not available
+        echo Please ensure Docker Desktop is installed with Compose support
+        echo.
+        pause
+        exit /b 1
+    )
+    set COMPOSE_CMD=docker-compose
+    docker-compose --version
+) else (
+    set COMPOSE_CMD=docker compose
+    docker compose version
 )
-echo Docker Compose found:
-docker compose version
+echo Using: %COMPOSE_CMD%
 echo.
 
 REM Check if Docker daemon is running
-echo [3/6] Checking if Docker daemon is running...
+echo [3/5] Checking if Docker daemon is running...
 docker info >nul 2>&1
 if errorlevel 1 (
     echo ERROR: Docker daemon is not running
@@ -51,54 +58,58 @@ if errorlevel 1 (
 echo Docker daemon is running
 echo.
 
-REM Setup environment files
-echo [4/6] Setting up environment files...
-
-if not exist "backend\.env" (
-    echo Creating backend\.env from backend\.env.example...
-    copy "backend\.env.example" "backend\.env" >nul
-    echo Backend .env created
+REM Setup root environment file
+echo [4/5] Setting up environment file...
+if not exist ".env" (
+    echo Creating .env from .env.example...
+    copy ".env.example" ".env" >nul
+    echo .env created successfully
+    echo IMPORTANT: Review .env and adjust configuration if needed
 ) else (
-    echo Backend .env already exists
-)
-
-if not exist "frontend\.env" (
-    echo Creating frontend\.env from frontend\.env.example...
-    copy "frontend\.env.example" "frontend\.env" >nul
-    echo Frontend .env created
-) else (
-    echo Frontend .env already exists
+    echo .env already exists
 )
 echo.
 
-REM Check for Node.js (optional for local development)
-echo [5/6] Checking Node.js installation (optional for local dev)...
+REM Install dependencies if Node.js is available
+echo [5/5] Installing dependencies (if Node.js is available)...
 node --version >nul 2>&1
 if errorlevel 1 (
-    echo WARNING: Node.js not found. Docker will handle dependencies.
-    echo For local development, install Node.js from: https://nodejs.org
+    echo Node.js not found. Dependencies will be installed inside Docker containers.
 ) else (
     echo Node.js found:
     node --version
     
-    REM Install dependencies if package.json exists and node_modules doesn't
+    REM Install backend dependencies
     if exist "backend\package.json" (
         if not exist "backend\node_modules" (
             echo Installing backend dependencies...
             cd backend
             call npm install
-            cd ..
+            if errorlevel 1 (
+                echo WARNING: Failed to install backend dependencies
+                cd ..
+            ) else (
+                echo Backend dependencies installed
+                cd ..
+            )
         ) else (
             echo Backend dependencies already installed
         )
     )
     
+    REM Install frontend dependencies
     if exist "frontend\package.json" (
         if not exist "frontend\node_modules" (
             echo Installing frontend dependencies...
             cd frontend
             call npm install
-            cd ..
+            if errorlevel 1 (
+                echo WARNING: Failed to install frontend dependencies
+                cd ..
+            ) else (
+                echo Frontend dependencies installed
+                cd ..
+            )
         ) else (
             echo Frontend dependencies already installed
         )
@@ -107,11 +118,13 @@ if errorlevel 1 (
 echo.
 
 REM Start Docker Compose
-echo [6/6] Starting Parking Management System with Docker Compose...
+echo ========================================
+echo Starting Parking Management System...
+echo ========================================
 echo This may take a few minutes on first run (building images)...
 echo.
 
-docker compose up -d --build
+%COMPOSE_CMD% up -d --build
 
 if errorlevel 1 (
     echo.
@@ -127,23 +140,33 @@ echo ========================================
 echo System started successfully!
 echo ========================================
 echo.
+
+REM Read port values from .env file if they exist
+set API_PORT=3000
+set WEB_PORT=5173
+if exist ".env" (
+    for /f "tokens=1,2 delims==" %%a in ('findstr /r "^API_PORT=" .env') do set API_PORT=%%b
+    for /f "tokens=1,2 delims==" %%a in ('findstr /r "^WEB_PORT=" .env') do set WEB_PORT=%%b
+)
+
 echo Services are now running:
-echo   - Frontend:  http://localhost:3001
-echo   - API:       http://localhost:3000
-echo   - Swagger:   http://localhost:3000/api/docs
+echo   - Frontend:  http://localhost:%WEB_PORT%
+echo   - API:       http://localhost:%API_PORT%
+echo   - Swagger:   http://localhost:%API_PORT%/api/docs
 echo.
 echo Default credentials:
 echo   Admin:    username: admin    password: admin123
 echo   Operator: username: operator password: operator123
 echo.
-echo To view logs:          docker compose logs -f
-echo To stop services:      docker compose down
-echo To restart services:   docker compose restart
+echo Useful commands:
+echo   View logs:        %COMPOSE_CMD% logs -f
+echo   Stop services:    %COMPOSE_CMD% down
+echo   Restart services: %COMPOSE_CMD% restart
 echo.
 echo Press any key to view service status...
 pause >nul
 
-docker compose ps
+%COMPOSE_CMD% ps
 
 echo.
 echo ========================================
