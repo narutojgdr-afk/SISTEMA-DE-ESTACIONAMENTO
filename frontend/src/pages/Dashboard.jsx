@@ -2,6 +2,16 @@ import React, { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { slotsService, staysService } from '../services/api';
 
+// Helper function to get vehicle type display with emoji
+const getVehicleTypeDisplay = (type) => {
+  const typeMap = {
+    car: '🚗 Car',
+    moto: '🏍️ Motorcycle',
+    pcd: '♿ PCD'
+  };
+  return typeMap[type] || type;
+};
+
 export default function Dashboard() {
   const [occupancy, setOccupancy] = useState(null);
   const [activeStays, setActiveStays] = useState([]);
@@ -66,9 +76,8 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
           {occupancy?.byType?.map((type) => (
             <div key={type.type} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 p-6 border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900 mb-5 capitalize flex items-center">
-                <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-3"></span>
-                {type.type === 'car' ? '🚗 Car' : type.type === 'moto' ? '🏍️ Motorcycle' : '♿ PCD'}
+              <h3 className="text-xl font-bold text-gray-900 mb-5 capitalize">
+                {getVehicleTypeDisplay(type.type)}
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
